@@ -68,12 +68,9 @@ def upload_product_to_motlin():
 
 
 def add_fields_to_flow():
-	#TODO поправить вызов функции в зависиммости от вызова
-
 	# flow_info = create_flow('Clients', 'Clients_Addresses', 'Clients_Addresses', True)
 	flow_id_pizzeria = '9af1050e-1133-4fcb-963d-6afe5a5f2eee'
 	# flow_id_client = 'a064cdac-052d-4244-84aa-a0574e7d2429'
-	# flow_id = flow_info['data']['id']
 
 	fields = ['courierID']
 
@@ -433,9 +430,8 @@ def successful_payment_callback(bot, update):
 
 def precheckout_callback(bot, update):
 	query = update.pre_checkout_query
-	# check the payload, is this from your bot?
+
 	if query.invoice_payload != 'Custom-Payload':
-		# answer False pre_checkout_query
 		bot.answer_pre_checkout_query(pre_checkout_query_id=query.id, ok=False,
 		                              error_message="Something went wrong...")
 	else:
@@ -476,9 +472,9 @@ if __name__ == '__main__':
 	dispatcher.add_handler(MessageHandler(Filters.text, handle_users_reply, pass_job_queue=True))
 	dispatcher.add_handler(CommandHandler('start', handle_users_reply, pass_job_queue=True))
 
-	# try:
-	# 	logger.warning('Bot TG is working')
-	# 	updater.start_polling()
-	# except Exception as err:
-	# 	logger.exception('Bot TG got an error')
-	updater.start_polling()
+	try:
+		logger.warning('Bot TG is working')
+		updater.start_polling()
+	except Exception as err:
+		logger.exception('Bot TG got an error')
+
