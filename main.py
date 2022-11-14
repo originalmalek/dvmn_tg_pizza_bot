@@ -424,7 +424,6 @@ def update_field_in_flow(slug):
 
 
 def successful_payment_callback(bot, update):
-
 	update.message.reply_text("Ваш заказ успешно оплачен!")
 
 
