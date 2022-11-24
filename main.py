@@ -33,63 +33,6 @@ def get_database_connection():
 	return _database
 
 
-def get_restaurant_list():
-	url = 'https://dvmn.org/media/filer_public/90/90/9090ecbf-249f-42c7-8635-a96985268b88/addresses.json'
-	addresses_list = requests.get(url)
-	addresses_list.raise_for_status()
-	return addresses_list.json()
-
-
-def get_pizzas_list():
-	url = 'https://dvmn.org/media/filer_public/a2/5a/a25a7cbd-541c-4caf-9bf9-70dcdf4a592e/menu.json'
-	pizzas_list = requests.get(url)
-	pizzas_list.raise_for_status()
-	return pizzas_list.json()
-
-
-def upload_product_to_motlin():
-	pizzas_list = get_pizzas_list()
-
-	for pizza in pizzas_list:
-		product_sku = pizza['id']
-		product_name = pizza['name']
-		product_description = pizza['description']
-		product_price = pizza['price']
-		product_image_url = pizza['product_image']['url']
-
-		product_info = add_product_to_shop(product_name, product_sku,
-		                                   product_description, product_price)
-		product_id = product_info['data']['id']
-
-		image_info = upload_picture(product_image_url)
-		image_id = image_info['data']['id']
-
-		link_picture_with_product(image_id, product_id)
-
-
-def add_fields_to_flow():
-	# flow_info = create_flow('Clients', 'Clients_Addresses', 'Clients_Addresses', True)
-	flow_id_pizzeria = '9af1050e-1133-4fcb-963d-6afe5a5f2eee'
-	# flow_id_client = 'a064cdac-052d-4244-84aa-a0574e7d2429'
-
-	fields = ['courierID']
-
-	for field in fields:
-		create_field(field, field, field, flow_id_pizzeria)
-
-
-def add_record_to_flow(flow_name='Pizzeria'):
-	# flow name 'Pizzeria' or 'Clients'
-	restaurant_list = get_restaurant_list()
-
-	for restaurant in restaurant_list:
-		address = restaurant['address']['full']
-		alias = restaurant['alias']
-		latitude = restaurant['coordinates']['lat']
-		longitude = restaurant['coordinates']['lon']
-		create_entry(flow_name, address, alias, longitude, latitude)
-
-
 def handle_description(bot, update, job_queue):
 	query = update.callback_query
 
@@ -212,7 +155,6 @@ def send_user_cart(bot, query):
 	reply_markup = generate_cart_markup(cart)
 
 	bot.send_message(text=user_order, chat_id=chat_id, reply_markup=reply_markup)
-
 	bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
 
 	return 'HANDLE_CART'
@@ -220,24 +162,23 @@ def send_user_cart(bot, query):
 
 def handle_menu(bot, update, job_queue):
 	query = update.callback_query
-	if json.loads(query.data)['act'] in query.data:
-		page_number = int(json.loads(query.data)['page_num'])
+	try:
+		if json.loads(query.data)['act'] in query.data:
+			page_number = int(json.loads(query.data)['page_num'])
 
-		reply_markup = InlineKeyboardMarkup(generate_menu_markup(page_number=page_number))
+			reply_markup = InlineKeyboardMarkup(generate_menu_markup(page_number=page_number))
 
-		bot.send_message(text='Please choose product:', chat_id=query.message.chat_id,
-		                 reply_markup=reply_markup)
-
-		bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
-		return 'HANDLE_MENU'
-
+			bot.send_message(text='Please choose product:', chat_id=query.message.chat_id,
+			                 reply_markup=reply_markup)
+			bot.delete_message(chat_id=query.message.chat_id, message_id=query.message.message_id)
+			return 'HANDLE_MENU'
+	except:
+		pass
 	if query.data == 'cart':
 		send_user_cart(bot, query)
 		return 'HANDLE_CART'
-
 	else:
 		product_response = get_product_data(query)
-
 		product_sku = product_response['sku']
 		product_name = product_response['name']
 		product_description = product_response['description']
@@ -414,22 +355,13 @@ def handle_pickup_delivery(bot, update, job_queue):
 	return 'START'
 
 
-def update_field_in_flow(slug):
-	all_entries = get_all_entries(slug)
-
-	for entry in all_entries['data']:
-		entry_id = entry['id']
-		print(entry_id)
-		update_entry('Pizzeria', entry_id, 'courierID', '2079105051')
-
-
 def successful_payment_callback(bot, update):
+
 	update.message.reply_text("Ваш заказ успешно оплачен!")
 
 
 def precheckout_callback(bot, update):
 	query = update.pre_checkout_query
-
 	if query.invoice_payload != 'Custom-Payload':
 		bot.answer_pre_checkout_query(pre_checkout_query_id=query.id, ok=False,
 		                              error_message="Something went wrong...")
@@ -438,12 +370,7 @@ def precheckout_callback(bot, update):
 
 
 if __name__ == '__main__':
-	# create_flow('Client_Address', 'Client_Addresses')
-	# upload_product_to_motlin()
-	# add_fields_to_flow()
-	# add_record_to_flow()
-	# get_closest_store()
-	# update_field_in_flow('Pizzeria')
+
 	load_dotenv()
 	_database = None
 	ep_store_id = os.getenv('EP_STORE_ID')
@@ -476,4 +403,3 @@ if __name__ == '__main__':
 		updater.start_polling()
 	except Exception as err:
 		logger.exception('Bot TG got an error')
-
