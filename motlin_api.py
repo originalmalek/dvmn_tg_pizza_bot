@@ -4,9 +4,6 @@ import os
 import requests
 
 from datetime import timedelta, datetime
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 EP_ACCESS_TOKEN = None
@@ -339,3 +336,72 @@ def update_entry(flow_slug, entry_id, field_name, courier_id):
 	response = requests.put(f'https://api.moltin.com/v2/flows/{flow_slug}/entries/{entry_id}', headers=headers, json=data)
 	response.raise_for_status()
 	return response.json()
+
+
+def update_field_in_flow(slug):
+	all_entries = get_all_entries(slug)
+
+	for entry in all_entries['data']:
+		entry_id = entry['id']
+
+		update_entry('Pizzeria', entry_id, 'courierID', '2079105051')
+
+
+def get_restaurant_list():
+	url = 'https://dvmn.org/media/filer_public/90/90/9090ecbf-249f-42c7-8635-a96985268b88/addresses.json'
+	addresses_list = requests.get(url)
+	addresses_list.raise_for_status()
+	return addresses_list.json()
+
+
+def get_pizzas_list():
+	url = 'https://dvmn.org/media/filer_public/a2/5a/a25a7cbd-541c-4caf-9bf9-70dcdf4a592e/menu.json'
+	pizzas_list = requests.get(url)
+	pizzas_list.raise_for_status()
+	return pizzas_list.json()
+
+
+def upload_product_to_motlin():
+	pizzas_list = get_pizzas_list()
+
+	for pizza in pizzas_list:
+		product_sku = pizza['id']
+		product_name = pizza['name']
+		product_description = pizza['description']
+		product_price = pizza['price']
+		product_image_url = pizza['product_image']['url']
+
+		product_info = add_product_to_shop(product_name, product_sku,
+		                                   product_description, product_price)
+		product_id = product_info['data']['id']
+
+		image_info = upload_picture(product_image_url)
+		image_id = image_info['data']['id']
+
+		link_picture_with_product(image_id, product_id)
+
+
+def add_fields_to_flow():
+	#TODO поправить вызов функции в зависиммости от вызова
+
+	# flow_info = create_flow('Clients', 'Clients_Addresses', 'Clients_Addresses', True)
+	flow_id_pizzeria = '9af1050e-1133-4fcb-963d-6afe5a5f2eee'
+	# flow_id_client = 'a064cdac-052d-4244-84aa-a0574e7d2429'
+	# flow_id = flow_info['data']['id']
+
+	fields = ['courierID']
+
+	for field in fields:
+		create_field(field, field, field, flow_id_pizzeria)
+
+
+def add_record_to_flow(flow_name='Pizzeria'):
+	# flow name 'Pizzeria' or 'Clients'
+	restaurant_list = get_restaurant_list()
+
+	for restaurant in restaurant_list:
+		address = restaurant['address']['full']
+		alias = restaurant['alias']
+		latitude = restaurant['coordinates']['lat']
+		longitude = restaurant['coordinates']['lon']
+		create_entry(flow_name, address, alias, longitude, latitude)
