@@ -139,8 +139,9 @@ def get_user_order(cart):
 		product_quantity = product['quantity']
 		product_total_price = product['meta']['display_price']['with_tax']['value']['formatted']
 
-		user_order += dedent(f'''{product_name}\n{product_description}
-	                   \n{product_quantity} шт. за {product_total_price}\n\n''')
+		user_order += dedent(f'''{product_name}
+								 {product_description}
+	                             {product_quantity} шт. за {product_total_price}\n\n''')
 
 	total_price = cart['meta']['display_price']['with_tax']['formatted']
 	user_order += f'Total price: {total_price}'
@@ -189,8 +190,13 @@ def handle_menu(bot, update, job_queue):
 
 		reply_markup = generate_product_markup(product_sku)
 
-		caption = f'''Описание продукта:\n\n{product_name}\n\n{product_description}
-                                \nСтоимость: {product_price} руб. за 1 пиццу'''
+		caption = dedent(f'''Описание продукта:
+		
+						{product_name}
+						
+						{product_description}
+                                
+                         Стоимость: {product_price} руб. за 1 пиццу''')
 
 		with open(f'pictures/{product_image_id}.jpeg', 'rb') as photo:
 			bot.send_photo(caption=caption,
