@@ -4,7 +4,8 @@ import os
 import requests
 
 from datetime import timedelta, datetime
-
+from dotenv import load_dotenv
+load_dotenv()
 
 EP_ACCESS_TOKEN = None
 EP_TOKEN_TIME = None
@@ -18,7 +19,8 @@ def get_access_token():
 	global EP_ACCESS_TOKEN
 	global EP_TOKEN_TIME
 
-	if not EP_ACCESS_TOKEN or datetime.now() > EP_TOKEN_TIME + timedelta(minutes=59):
+	if not EP_ACCESS_TOKEN or datetime.now() >= EP_TOKEN_TIME:
+		print(ep_client_id, ep_client_secret)
 		data = {
 			'client_id': ep_client_id,
 			'client_secret': ep_client_secret,
@@ -28,7 +30,7 @@ def get_access_token():
 		response = requests.post('https://api.moltin.com/oauth/access_token', data=data)
 		response.raise_for_status()
 		EP_ACCESS_TOKEN = response.json()['access_token']
-		EP_TOKEN_TIME = datetime.now()
+		EP_TOKEN_TIME = response.json()['expires']
 	return EP_ACCESS_TOKEN
 
 
