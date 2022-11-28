@@ -20,7 +20,6 @@ def get_access_token():
 	global EP_TOKEN_TIME
 
 	if not EP_ACCESS_TOKEN or datetime.now() >= EP_TOKEN_TIME:
-		print(ep_client_id, ep_client_secret)
 		data = {
 			'client_id': ep_client_id,
 			'client_secret': ep_client_secret,
