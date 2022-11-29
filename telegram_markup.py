@@ -5,9 +5,11 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 def generate_menu_markup(page_number=1):
 	products = get_products()
 	pagination_keyboard = []
-	pages_quantity = len(products['data']) // 8 + 1
 
-	num_last_product = page_number * 8
+	products_in_one_page = 8
+	pages_quantity = len(products['data']) // products_in_one_page + 1
+
+	num_last_product = page_number * products_in_one_page
 	num_first_product = num_last_product - 8
 
 	markup = [([InlineKeyboardButton(product['name'],
