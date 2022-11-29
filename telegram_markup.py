@@ -61,5 +61,3 @@ def generate_delivery_markup():
 	            [InlineKeyboardButton("Самовывоз", callback_data='pickup')]]
 
 	return InlineKeyboardMarkup(keyboard)
-
-	return InlineKeyboardMarkup(keyboard)
