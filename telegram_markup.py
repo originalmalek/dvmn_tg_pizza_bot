@@ -57,10 +57,9 @@ def generate_cart_markup(cart):
 
 
 def generate_delivery_markup():
-	keyboard = []
-	delivery_button = [InlineKeyboardButton("Доставка", callback_data='delivery')]
-	pickup_button = [InlineKeyboardButton("Самовывоз", callback_data='pickup')]
-	keyboard.append(delivery_button)
-	keyboard.append(pickup_button)
+    keyboard = [[InlineKeyboardButton("Доставка", callback_data='delivery')],
+	            [InlineKeyboardButton("Самовывоз", callback_data='pickup')]]
+
+	return InlineKeyboardMarkup(keyboard)
 
 	return InlineKeyboardMarkup(keyboard)
