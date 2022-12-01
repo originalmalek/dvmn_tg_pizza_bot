@@ -15,10 +15,8 @@ from telegram.ext import CallbackQueryHandler, CommandHandler, MessageHandler, P
 
 from motlin_api import get_cart, add_item_to_cart, get_access_token, get_product_data, get_all_fields
 from motlin_api import delete_cart_item, add_order_to_crm, download_product_picture, update_field, update_entry
-from motlin_api import link_picture_with_product, upload_picture, add_product_to_shop, create_entry, get_flow
-from motlin_api import create_flow, create_field, get_all_entries, create_entry_client_address
-
-load_dotenv()
+from motlin_api import create_entry, get_flow
+from motlin_api import create_field, get_all_entries, create_entry_client_address
 
 logger = logging.getLogger('TG ElasticPath Bot')
 
@@ -58,10 +56,6 @@ def handle_description(bot, update, job_queue):
 		                          show_alert=True)
 
 		return 'HANDLE_DESCRIPTION'
-
-	if query.data == 'cart':
-		send_user_cart(bot, query)
-		return 'HANDLE_CART'
 
 
 def handle_users_reply(bot, update, job_queue):
@@ -351,7 +345,6 @@ def handle_pickup_delivery(bot, update, job_queue):
 		bot.delete_message(chat_id=query.message.chat_id,
 		                   message_id=query.message.message_id)
 
-
 	total_price = int(cart['meta']['display_price']['with_tax']['amount'])
 
 	get_user_payment(bot, update, total_price)
@@ -362,7 +355,6 @@ def handle_pickup_delivery(bot, update, job_queue):
 
 
 def successful_payment_callback(bot, update):
-
 	update.message.reply_text("Ваш заказ успешно оплачен!")
 
 
