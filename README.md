@@ -46,7 +46,13 @@ pip install -r requirements.txt
 ### How to use
 
 Install requirements.  
-Open and run 'main.py'.
+Run 'script_create_flows.py' and 'script_uploaded_products.py'.
+```
+python script_create_flows.py
+python script_uploaded_products.py
+```
+
+Run 'main.py'.
 ```
 python main.py	
 ```
