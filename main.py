@@ -11,16 +11,16 @@ from dotenv import load_dotenv
 from telegram_logger import MyLogsHandler
 
 from telegram_markup import generate_menu_markup, generate_product_markup, generate_cart_markup, \
-							generate_delivery_markup
+	generate_delivery_markup
 
 from telegram import InlineKeyboardMarkup, LabeledPrice
 
 from telegram.ext import Filters, Updater, CallbackQueryHandler, CommandHandler, \
-						 MessageHandler, PreCheckoutQueryHandler
+	MessageHandler, PreCheckoutQueryHandler
 
 from motlin_api import get_cart, add_item_to_cart, get_access_token, get_product_data, \
-					   get_all_fields, delete_cart_item, add_order_to_crm, download_product_picture, \
-					   get_flow, get_all_entries, create_entry_client_address, get_access_token
+	get_all_fields, delete_cart_item, add_order_to_crm, download_product_picture, \
+	get_flow, get_all_entries, create_entry_client_address, get_access_token
 
 logger = logging.getLogger('TG ElasticPath Bot')
 
@@ -123,7 +123,7 @@ def handle_cart(bot, update, job_queue):
 		return 'HANDLE_LOCATION'
 
 	if json.loads(query.data)['action'] == 'del':
-		delete_cart_item(bot, query)
+		delete_cart_item(query)
 		send_user_cart(bot, query)
 		return 'HANDLE_CART'
 
@@ -189,11 +189,11 @@ def handle_menu(bot, update, job_queue):
 		reply_markup = generate_product_markup(product_sku)
 
 		caption = dedent(f'''Описание продукта:
-		
+
 						{product_name}
-						
+
 						{product_description}
-                                
+
                          Стоимость: {product_price} руб. за 1 пиццу''')
 
 		with open(f'pictures/{product_image_id}.jpeg', 'rb') as photo:
@@ -251,7 +251,7 @@ def handle_location(bot, update, job_queue):
 
 	create_entry_client_address('Clients_Addresses', update.message.chat_id, current_pos[1], current_pos[0])
 	if km_distance <= 0.5:
-		reply_markup = generate_delivery_markup(closest_store["Address"], closest_store["Address"])
+		reply_markup = generate_delivery_markup()
 		bot.send_message(
 			text=f'Самовывоз с {closest_store["Address"]} всего {km_distance} км. от вас или бесплатная доставка',
 			chat_id=update.message.chat_id,
@@ -372,12 +372,8 @@ def precheckout_callback(bot, update):
 
 
 if __name__ == '__main__':
-
 	load_dotenv()
 	_database = None
-	ep_store_id = os.getenv('EP_STORE_ID')
-	ep_client_id = os.getenv('EP_CLIENT_ID')
-	ep_client_secret = os.getenv('EP_CLIENT_SECRET')
 	telegram_api_key = os.getenv('TELEGRAM_API_KEY')
 	telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
 	yandex_api_key = os.getenv('YANDEX_API_KEY')
