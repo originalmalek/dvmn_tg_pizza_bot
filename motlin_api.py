@@ -5,24 +5,19 @@ import requests
 
 from datetime import timedelta, datetime
 from dotenv import load_dotenv
-load_dotenv()
+
 
 EP_ACCESS_TOKEN = None
 EP_TOKEN_TIME = None
-
-ep_store_id = os.getenv('EP_STORE_ID')
-ep_client_id = os.getenv('EP_CLIENT_ID')
-ep_client_secret = os.getenv('EP_CLIENT_SECRET')
-
 
 def get_access_token():
 	global EP_ACCESS_TOKEN
 	global EP_TOKEN_TIME
 
-	if not EP_ACCESS_TOKEN or datetime.now().timestamp() >= EP_TOKEN_TIME:
+	if not EP_ACCESS_TOKEN or datetime.now().timestamp() >= EP_TOKEN_TIME - 30:  #30 sec is reserve
 		data = {
-			'client_id': ep_client_id,
-			'client_secret': ep_client_secret,
+			'client_id': os.getenv('EP_CLIENT_ID'),
+			'client_secret': os.getenv('EP_CLIENT_SECRET'),
 			'grant_type': 'client_credentials',
 		}
 
@@ -66,7 +61,7 @@ def add_item_to_cart(product_sku, quantity, chat_id):
 	return response.json()
 
 
-def delete_cart_item(bot, query):
+def delete_cart_item(query):
 	headers = {
 		'Authorization': get_access_token(),
 	}
@@ -166,3 +161,7 @@ def get_all_fields():
 	response = requests.get('https://api.moltin.com/v2/fields', headers=headers)
 	response.raise_for_status()
 	return response.json()
+
+
+if __name__ == '__main__':
+    load_dotenv()
