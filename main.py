@@ -251,7 +251,8 @@ def handle_location(bot, update, job_queue):
 
 	create_entry_client_address('Clients_Addresses', update.message.chat_id, current_pos[1], current_pos[0])
 	if km_distance <= 0.5:
-		reply_markup = generate_delivery_markup()
+		reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("Доставка", callback_data='delivery')],
+	                                        [InlineKeyboardButton("Самовывоз", callback_data='pickup')]])
 		bot.send_message(
 			text=f'Самовывоз с {closest_store["Address"]} всего {km_distance} км. от вас или бесплатная доставка',
 			chat_id=update.message.chat_id,
