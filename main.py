@@ -13,7 +13,7 @@ from telegram_logger import MyLogsHandler
 from telegram_markup import generate_menu_markup, generate_product_markup, generate_cart_markup, \
 	generate_delivery_markup
 
-from telegram import InlineKeyboardMarkup, LabeledPrice
+from telegram import InlineKeyboardMarkup, LabeledPrice, InlineKeyboardButton
 
 from telegram.ext import Filters, Updater, CallbackQueryHandler, CommandHandler, \
 	MessageHandler, PreCheckoutQueryHandler
