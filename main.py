@@ -1,22 +1,26 @@
-import logging
-import requests
-import os
-import redis
 import json
+import logging
+import os
+
+import redis
+import requests
+
 from geopy import distance
 from textwrap import dedent
 from dotenv import load_dotenv
 from telegram_logger import MyLogsHandler
-from telegram_markup import generate_menu_markup, generate_product_markup, generate_cart_markup, \
-	generate_delivery_markup
-from telegram import InlineKeyboardMarkup, LabeledPrice
-from telegram.ext import Filters, Updater
-from telegram.ext import CallbackQueryHandler, CommandHandler, MessageHandler, PreCheckoutQueryHandler
 
-from motlin_api import get_cart, add_item_to_cart, get_access_token, get_product_data, get_all_fields
-from motlin_api import delete_cart_item, add_order_to_crm, download_product_picture, update_field, update_entry
-from motlin_api import create_entry, get_flow
-from motlin_api import create_field, get_all_entries, create_entry_client_address
+from telegram_markup import generate_menu_markup, generate_product_markup, generate_cart_markup, \
+							generate_delivery_markup
+
+from telegram import InlineKeyboardMarkup, LabeledPrice
+
+from telegram.ext import Filters, Updater, CallbackQueryHandler, CommandHandler, \
+						 MessageHandler, PreCheckoutQueryHandler
+
+from motlin_api import get_cart, add_item_to_cart, get_access_token, get_product_data, \
+					   get_all_fields, delete_cart_item, add_order_to_crm, download_product_picture, \
+					   get_flow, get_all_entries, create_entry_client_address, get_access_token
 
 logger = logging.getLogger('TG ElasticPath Bot')
 
