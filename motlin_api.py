@@ -23,8 +23,9 @@ def get_access_token():
 
 		response = requests.post('https://api.moltin.com/oauth/access_token', data=data)
 		response.raise_for_status()
-		EP_ACCESS_TOKEN = response.json()['access_token']
-		EP_TOKEN_TIME = response.json()['expires']
+        response_json = response.json()
+		EP_ACCESS_TOKEN = response_json['access_token']
+		EP_TOKEN_TIME = response_json['expires']
 	return EP_ACCESS_TOKEN
 
 
