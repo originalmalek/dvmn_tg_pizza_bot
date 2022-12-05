@@ -30,11 +30,13 @@ EP_STORE_ID=your_elasticpath_store_id
 EP_CLIENT_ID=your_elasticpath_client_id
 EP_CLIENT_SECRET=your_elasticpath_clien_secret
 TELEGRAM_API_KEY=your_telegram_api_key
+TELEGRAM_CHAT_ID=telegram_chat_id_for_logger
 DATABASE_HOST=your_redis_database_host
 DATABASE_PASSWORD=your_redis_database_password
 DATABASE_PORT=your_redis_database_port
 YANDEX_API_KEY=yandex_maps_api_key
 TELEGRAM_PAYMENT_TOKEN=telegram_payment_token
+COURIER_ID=courier_test_chat_id
 ```
 
 Install requirements modules:
