@@ -56,10 +56,3 @@ def generate_cart_markup(cart):
 	delete_from_cart_keyboard.append(pay_button)
 	keyboard = delete_from_cart_keyboard
 	return InlineKeyboardMarkup(keyboard)
-
-
-def generate_delivery_markup():
-    keyboard = [[InlineKeyboardButton("Доставка", callback_data='delivery')],
-	            [InlineKeyboardButton("Самовывоз", callback_data='pickup')]]
-
-	return InlineKeyboardMarkup(keyboard)
