@@ -11,16 +11,16 @@ from dotenv import load_dotenv
 from telegram_logger import MyLogsHandler
 
 from telegram_markup import generate_menu_markup, generate_product_markup, generate_cart_markup, \
-	generate_delivery_markup
+	
 
 from telegram import InlineKeyboardMarkup, LabeledPrice, InlineKeyboardButton
 
 from telegram.ext import Filters, Updater, CallbackQueryHandler, CommandHandler, \
 	MessageHandler, PreCheckoutQueryHandler
 
-from motlin_api import get_cart, add_item_to_cart, get_access_token, get_product_data, \
-	get_all_fields, delete_cart_item, add_order_to_crm, download_product_picture, \
-	get_flow, get_all_entries, create_entry_client_address, get_access_token
+from motlin_api import get_cart, add_item_to_cart, get_product_data, delete_cart_item, \
+	download_product_picture, get_all_entries, create_entry_client_address
+
 
 logger = logging.getLogger('TG ElasticPath Bot')
 
