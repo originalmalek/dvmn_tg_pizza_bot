@@ -10,7 +10,7 @@ from textwrap import dedent
 from dotenv import load_dotenv
 from telegram_logger import MyLogsHandler
 
-from telegram_markup import generate_menu_markup, generate_product_markup, generate_cart_markup, \
+from telegram_markup import generate_menu_markup, generate_product_markup, generate_cart_markup
 	
 
 from telegram import InlineKeyboardMarkup, LabeledPrice, InlineKeyboardButton
