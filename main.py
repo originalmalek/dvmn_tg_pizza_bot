@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 from telegram_logger import MyLogsHandler
 
 from telegram_markup import generate_menu_markup, generate_product_markup, generate_cart_markup
-	
 
 from telegram import InlineKeyboardMarkup, LabeledPrice, InlineKeyboardButton
 
@@ -20,7 +19,6 @@ from telegram.ext import Filters, Updater, CallbackQueryHandler, CommandHandler,
 
 from motlin_api import get_cart, add_item_to_cart, get_product_data, delete_cart_item, \
 	download_product_picture, get_all_entries, create_entry_client_address
-
 
 logger = logging.getLogger('TG ElasticPath Bot')
 
@@ -260,27 +258,31 @@ def handle_location(bot, update, job_queue):
 
 		bot.delete_message(chat_id=update.message.chat_id,
 		                   message_id=update.message.message_id)
-		return 'HANDLE_PICKUP_DELIVERY'
 
 	if 0.5 < km_distance <= 5:
+		reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("Доставка", callback_data='delivery')]])
 		bot.send_message(text=f'Доставка 100 руб',
-		                 chat_id=update.message.chat_id, )
+		                 chat_id=update.message.chat_id,
+		                 reply_markup=reply_markup)
 
 		bot.delete_message(chat_id=update.message.chat_id,
 		                   message_id=update.message.message_id)
 	if 5 < km_distance <= 20:
+		reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("Доставка", callback_data='delivery')]])
 		bot.send_message(text=f'Доставка 300 руб',
-		                 chat_id=update.message.chat_id, )
+		                 chat_id=update.message.chat_id,
+		                 reply_markup=reply_markup)
 
 		bot.delete_message(chat_id=update.message.chat_id,
 		                   message_id=update.message.message_id)
 	if 20 < km_distance:
-		bot.send_message(text=f'Все пиццерии находятся слишком далеко',
+		bot.send_message(text=f'Все пиццерии находятся слишком далеко. Чтобы '
+		                      f'вернуться нажмите /start',
 		                 chat_id=update.message.chat_id, )
 
 		bot.delete_message(chat_id=update.message.chat_id,
 		                   message_id=update.message.message_id)
-	return 'HANDLE_LOCATION'
+	return 'HANDLE_PICKUP_DELIVERY'
 
 
 def get_closest_store(person_location):
