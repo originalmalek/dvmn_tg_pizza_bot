@@ -3,7 +3,7 @@ import os
 
 import requests
 
-from datetime import timedelta, datetime
+from datetime import datetime
 from dotenv import load_dotenv
 
 
@@ -23,7 +23,7 @@ def get_access_token():
 
 		response = requests.post('https://api.moltin.com/oauth/access_token', data=data)
 		response.raise_for_status()
-        response_json = response.json()
+		response_json = response.json()
 		EP_ACCESS_TOKEN = response_json['access_token']
 		EP_TOKEN_TIME = response_json['expires']
 	return EP_ACCESS_TOKEN
@@ -100,7 +100,7 @@ def get_product_data(query):
 	return product_response.json()['data']
 
 
-def download_product_picture(product_image_id):
+def get_image_url(product_image_id):
 	headers = {
 		'Authorization': get_access_token(),
 	}
@@ -108,6 +108,11 @@ def download_product_picture(product_image_id):
 	image_response.raise_for_status()
 
 	image_url = image_response.json()['data']['link']['href']
+	return image_url
+
+
+def download_product_picture(product_image_id):
+	image_url = get_image_url(product_image_id)
 
 	if not os.path.exists(f'pictures/{product_image_id}.jpeg'):
 		with open(f'pictures/{product_image_id}.jpeg', 'wb') as f:
