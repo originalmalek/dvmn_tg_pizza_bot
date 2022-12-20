@@ -7,7 +7,7 @@ def create_product_carousel(category_name='main'):
     products = get_products_by_category(category_name)
 
     for product in products['data']:
-        product_id = product['id']
+        product_id = product['sku']
         product_name = product['name']
         product_description = product['description']
         product_price = product['meta']['display_price']['with_tax']['amount']
@@ -19,11 +19,6 @@ def create_product_carousel(category_name='main'):
             'image_url': f'{image_url}',
             'subtitle': f'{product_description}',
             'buttons': [
-                {
-                    'type': 'postback',
-                    'title': 'Корзина',
-                    'payload': 'cart',
-                },
                 {
                     'type': 'postback',
                     'title': 'Добавить корзину',
