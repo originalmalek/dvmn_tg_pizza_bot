@@ -121,7 +121,7 @@ def handle_cart(bot, update, job_queue):
         return 'HANDLE_LOCATION'
 
     if json.loads(query.data)['action'] == 'del':
-        delete_cart_item(query)
+        delete_cart_item(json.loads(query.message.chat_id, query.data['id']))
         send_user_cart(bot, query)
         return 'HANDLE_CART'
 

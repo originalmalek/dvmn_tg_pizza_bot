@@ -62,12 +62,12 @@ def add_item_to_cart(product_sku, quantity, chat_id):
     return response.json()
 
 
-def delete_cart_item(query):
+def delete_cart_item(chat_id, product_id):
     headers = {
         'Authorization': get_access_token(),
     }
-    product_id = json.loads(query.data)['id']
-    response = requests.delete(f'https://api.moltin.com/v2/carts/{query.message.chat_id}/items/{product_id}',
+
+    response = requests.delete(f'https://api.moltin.com/v2/carts/{chat_id}/items/{product_id}',
                                headers=headers)
     response.raise_for_status()
     return response.json()
