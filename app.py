@@ -1,12 +1,32 @@
 import os
-import sys
+import logging
 import json
-from datetime import datetime
 
+import redis
 import requests
+
+from telegram_logger import MyLogsHandler
+
+from dotenv import load_dotenv
 from flask import Flask, request
-from facebook_markup import create_product_carousel, create_first_page_of_carousel
+
+from facebook_markup import create_product_carousel, create_first_templates_of_menu, create_last_template_of_menu, \
+                            create_first_templates_of_cart, create_product_templates_of_cart
+from motlin_api import add_item_to_cart, get_cart, delete_cart_item
+
 app = Flask(__name__)
+logger = logging.getLogger('FB ElasticPath Bot')
+_database = None
+
+
+def get_database_connection():
+    global _database
+    if _database is None:
+        database_password = os.getenv('DATABASE_PASSWORD')
+        database_host = os.getenv('DATABASE_HOST')
+        database_port = os.getenv('DATABASE_PORT')
+        _database = redis.Redis(host=database_host, port=database_port, password=database_password)
+    return _database
 
 
 @app.route('/', methods=['GET'])
@@ -27,18 +47,119 @@ def webhook():
     """
     Основной вебхук, на который будут приходить сообщения от Facebook.
     """
+    db = get_database_connection()
+
     data = request.get_json()
-    if data["object"] == "page":
-        for entry in data["entry"]:
-            for messaging_event in entry["messaging"]:
-                if messaging_event.get("message"):  # someone sent us a message
-                    sender_id = messaging_event["sender"]["id"]        # the facebook ID of the person sending you the message
-                    recipient_id = messaging_event["recipient"]["id"]  # the recipient's ID, which should be your page's facebook ID
-                    message_text = messaging_event["message"]["text"]  # the message's text
-                    # send_message(sender_id, message_text)
-                    send_keyboard(sender_id)
+    sender_id = data['entry'][0]['messaging'][0]['sender']['id']
+    user_state = db.hget(f'facebook_{sender_id}', 'user_state')
+
+    # db.delete(f'facebook_{sender_id}')
+    print(user_state)
+    if user_state == None:
+        user_state = send_menu(sender_id)
+        db.hset(f'facebook_{sender_id}', 'user_state', user_state)
+        return "ok", 200
+    if user_state.decode('utf-8') == 'menu':
+        user_state = handle_main_menu(data, sender_id)
+        db.hset(f'facebook_{sender_id}', 'user_state', user_state)
+        return "ok", 200
+    if user_state.decode('utf-8') == 'cart':
+        user_state = handle_cart(data, sender_id)
+        db.hset(f'facebook_{sender_id}', 'user_state', user_state)
+        return "ok", 200
+    # if data["object"] == "page":
+    #     for entry in data["entry"]:
+    #         for messaging_event in entry["messaging"]:
+    #             if messaging_event.get("message"):  # someone sent us a message
+    #                 sender_id = messaging_event["sender"]["id"]  # the facebook ID of the person sending you the message
+    #                 recipient_id = messaging_event["recipient"]["id"]  # the recipient's ID, which should be your page's facebook ID
+    #                 message_text = messaging_event["message"]["text"]  # the message's text
+    #                 # send_message(sender_id, message_text)
+    #                 # send_keyboard(sender_id)
 
     return "ok", 200
+
+
+def handle_cart(data, sender_id):
+    if 'postback' in data['entry'][0]['messaging'][0]:
+        payload = data['entry'][0]['messaging'][0]['postback']['payload']
+        return handle_payload(payload, sender_id, 'cart')
+    else:
+        send_message(sender_id, 'Неверная команда')
+        send_cart(sender_id)
+        return 'cart'
+
+
+
+def handle_payload(payload, sender_id, user_state):
+    try:
+        payload = eval(payload)
+        if 'add_to_cart' in payload:
+            add_item_to_cart(payload['add_to_cart'], 1, f'facebook_{sender_id}')
+        if 'del_from_cart' in payload:
+            delete_cart_item(f'facebook_{sender_id}', payload['del_from_cart'])
+        send_cart(sender_id)
+        return user_state
+    except:
+        print('ex')
+
+    if payload == 'cart':  # корзина
+        send_cart(sender_id)
+        return 'cart'
+
+    if payload == 'rich':  # сытные пиццы
+        send_menu(sender_id, pizzas_type='rich')
+
+    if payload == 'special':  # специальные пиццы
+        send_menu(sender_id, pizzas_type='special')
+
+    if payload == 'main' or payload =='menu':  # основные пиццы
+        send_menu(sender_id, pizzas_type='main')
+
+    if payload == 'hot':  # острые пиццы
+        send_menu(sender_id, pizzas_type='hot')
+
+    return 'menu'
+
+
+def handle_main_menu(data, sender_id):
+    if 'postback' in data['entry'][0]['messaging'][0]:
+        payload = data['entry'][0]['messaging'][0]['postback']['payload']
+        return handle_payload(payload, sender_id, 'menu')
+    else:
+        send_message(sender_id, 'Неверная команда')
+        send_menu(sender_id)
+        return 'menu'
+
+
+def send_cart(sender_id):
+    cart = get_cart(f'facebook_{sender_id}')
+
+    params = {"access_token": os.environ['FACEBOOK_PAGE_ACCESS_TOKEN']}
+    headers = {"Content-Type": "application/json"}
+
+    cart_carousel = create_first_templates_of_cart(cart['meta']['display_price']['with_tax']['amount']) + \
+                    create_product_templates_of_cart(cart)
+
+    json_data = {
+        'recipient': {
+            'id': sender_id,
+        },
+        'message': {
+            'attachment': {
+                'type': 'template',
+                'payload': {
+                    'template_type': 'generic',
+                    'elements': cart_carousel,
+                },
+            },
+        },
+    }
+
+    response = requests.post('https://graph.facebook.com/v2.6/me/messages',
+                             headers=headers, json=json_data, params=params)
+    response.raise_for_status()
+    return 'main'
 
 
 def send_message(recipient_id, message_text):
@@ -52,19 +173,17 @@ def send_message(recipient_id, message_text):
             "text": message_text
         }
     })
-    response = requests.post("https://graph.facebook.com/v2.6/me/messages", params=params, headers=headers, data=request_content)
+    response = requests.post("https://graph.facebook.com/v2.6/me/messages", params=params, headers=headers,
+                             data=request_content)
     response.raise_for_status()
 
 
-def send_menu():
-    pass
-
-
-def send_keyboard(sender_id):
+def send_menu(sender_id, pizzas_type='main'):
     params = {"access_token": os.environ['FACEBOOK_PAGE_ACCESS_TOKEN']}
     headers = {"Content-Type": "application/json"}
-    # menu_carousel = create_first_page_of_carousel().append(create_product_carousel())
-    menu_carousel = create_first_page_of_carousel() + create_product_carousel()
+
+    menu_carousel = create_first_templates_of_menu() + create_product_carousel(pizzas_type) + \
+                    create_last_template_of_menu(pizzas_type)
 
     json_data = {
         'recipient': {
@@ -81,9 +200,27 @@ def send_keyboard(sender_id):
         },
     }
 
-    response = requests.post('https://graph.facebook.com/v2.6/me/messages', headers=headers, json=json_data, params=params)
+    response = requests.post('https://graph.facebook.com/v2.6/me/messages',
+                             headers=headers, json=json_data, params=params)
     response.raise_for_status()
+    return 'menu'
+
+
+def send_keyboard(sender_id):
+    pass
 
 
 if __name__ == '__main__':
+    load_dotenv()
+    ep_store_id = os.getenv('EP_STORE_ID')
+    ep_client_id = os.getenv('EP_CLIENT_ID')
+    ep_client_secret = os.getenv('EP_CLIENT_SECRET')
+    telegram_api_key = os.getenv('TELEGRAM_API_KEY')
+    telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
+
+    my_log_handler = MyLogsHandler(level=logging.DEBUG, telegram_token=telegram_api_key,
+                                   chat_id=telegram_chat_id)
+    logging.basicConfig(level=20)
+    logger.addHandler(my_log_handler)
+
     app.run(debug=True)
