@@ -54,7 +54,6 @@ def webhook():
     user_state = db.hget(f'facebook_{sender_id}', 'user_state')
 
     # db.delete(f'facebook_{sender_id}')
-    print(user_state)
     if user_state == None:
         user_state = send_menu(sender_id)
         db.hset(f'facebook_{sender_id}', 'user_state', user_state)
@@ -67,15 +66,6 @@ def webhook():
         user_state = handle_cart(data, sender_id)
         db.hset(f'facebook_{sender_id}', 'user_state', user_state)
         return "ok", 200
-    # if data["object"] == "page":
-    #     for entry in data["entry"]:
-    #         for messaging_event in entry["messaging"]:
-    #             if messaging_event.get("message"):  # someone sent us a message
-    #                 sender_id = messaging_event["sender"]["id"]  # the facebook ID of the person sending you the message
-    #                 recipient_id = messaging_event["recipient"]["id"]  # the recipient's ID, which should be your page's facebook ID
-    #                 message_text = messaging_event["message"]["text"]  # the message's text
-    #                 # send_message(sender_id, message_text)
-    #                 # send_keyboard(sender_id)
 
     return "ok", 200
 
@@ -101,7 +91,7 @@ def handle_payload(payload, sender_id, user_state):
         send_cart(sender_id)
         return user_state
     except:
-        print('ex')
+        pass
 
     if payload == 'cart':  # корзина
         send_cart(sender_id)
@@ -206,10 +196,6 @@ def send_menu(sender_id, pizzas_type='main'):
     return 'menu'
 
 
-def send_keyboard(sender_id):
-    pass
-
-
 if __name__ == '__main__':
     load_dotenv()
     ep_store_id = os.getenv('EP_STORE_ID')
@@ -223,4 +209,9 @@ if __name__ == '__main__':
     logging.basicConfig(level=20)
     logger.addHandler(my_log_handler)
 
-    app.run(debug=True)
+    try:
+        logger.warning('Bot FB is working')
+        app.run(debug=True)
+    except Exception as err:
+        logger.exception('Bot FB got an error')
+
