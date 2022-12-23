@@ -1,4 +1,4 @@
-from motlin_api import get_products, get_image_url, get_products_by_category
+from motlin_api import get_image_url, get_products_by_category, get_cart
 from dotenv import load_dotenv
 
 
@@ -29,7 +29,7 @@ def create_product_carousel(category_name='main'):
     return product_carousel
 
 
-def create_first_page_of_carousel():
+def create_first_templates_of_menu():
     return [{
         'title': f'Пиццерия. Заказать пиццу прямо сейчас.',
         'image_url': 'https://st2.depositphotos.com/3687485/9049/v/950/depositphotos_90493674-stock-illustration-pizza-flat-icon-logo-template.jpg',
@@ -42,11 +42,6 @@ def create_first_page_of_carousel():
             },
             {
                 'type': 'postback',
-                'title': 'Акции',
-                'payload': 'sale',
-            },
-            {
-                'type': 'postback',
                 'title': 'Сделать заказ',
                 'payload': 'make_order',
             },
@@ -54,35 +49,71 @@ def create_first_page_of_carousel():
     }]
 
 
-def create_last_page_of_carousel(category_name):
+def create_last_template_of_menu(category_name):
+    pizza_categories_in_menu = []
     all_pizza_categories = {'main': 'Основные пиццы',
                             'special': 'Особенные пиццы',
                             'hot': 'Острые пиццы',
                             'rich': 'Сытные пиццы',
                             }
     all_pizza_categories.pop(category_name)
-    pizzas_categories_values = list(all_pizza_categories.items())
-
+    for key, value in all_pizza_categories.items():
+        pizza_categories_in_menu.append({
+            'type': 'postback',
+            'title': value,
+            'payload': key,
+        })
 
     return [{
         'title': f'Не нашли нужную пиццу?',
         'image_url': 'https://primepizza.ru/uploads/position/large_0c07c6fd5c4dcadddaf4a2f1a2c218760b20c396.jpg',
         'subtitle': f'Найдите свою пиццу в другой категории',
+        'buttons': pizza_categories_in_menu
+        ,
+    }]
+
+
+def create_product_templates_of_cart(cart):
+    cart_carousel = []
+    for product in cart['data']:
+        product_id = product['id']
+        product_name = product['name']
+        product_description = product['description']
+        image_url = product['image']['href']
+        quantity = product['quantity']
+        total_amount = product['value']['amount']
+
+
+        cart_carousel.append({
+            'title': f'{product_name}. {quantity} пиццы в корзине на {total_amount} руб.',
+            'image_url': f'{image_url}',
+            'subtitle': f'{product_description}',
+            'buttons': [
+                {
+                    'type': 'postback',
+                    'title': 'Добавить ещё одну',
+                    'payload': product_id,
+                },
+                {
+                    'type': 'postback',
+                    'title': 'Удалить из корзины',
+                    'payload': product_id,
+                },
+            ],
+        })
+    return cart_carousel
+
+
+def create_first_templates_of_cart(money_amount):
+    return [{
+        'title': f'Ваш заказ на {money_amount} рублей',
+        'image_url': 'https://st2.depositphotos.com/3687485/9049/v/950/depositphotos_90493674-stock-illustration-pizza-flat-icon-logo-template.jpg',
+        'subtitle': f'Быcтрая доставка за 35 минут',
         'buttons': [
             {
                 'type': 'postback',
-                'title': pizzas_categories_values[0][1],
-                'payload': pizzas_categories_values[0][0],
-            },
-            {
-                'type': 'postback',
-                'title': pizzas_categories_values[1][1],
-                'payload': pizzas_categories_values[1][0],
-            },
-            {
-                'type': 'postback',
-                'title': pizzas_categories_values[2][1],
-                'payload': pizzas_categories_values[2][0],
+                'title': 'Возврат в меню',
+                'payload': 'menu',
             },
         ],
     }]
