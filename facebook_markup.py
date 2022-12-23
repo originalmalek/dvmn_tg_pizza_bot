@@ -22,7 +22,7 @@ def create_product_carousel(category_name='main'):
                 {
                     'type': 'postback',
                     'title': 'Добавить корзину',
-                    'payload': product_id,
+                    'payload': str({'add_to_cart': product_id}),
                 },
             ],
         })
@@ -77,6 +77,7 @@ def create_product_templates_of_cart(cart):
     cart_carousel = []
     for product in cart['data']:
         product_id = product['id']
+        product_sku = product['sku']
         product_name = product['name']
         product_description = product['description']
         image_url = product['image']['href']
@@ -92,12 +93,12 @@ def create_product_templates_of_cart(cart):
                 {
                     'type': 'postback',
                     'title': 'Добавить ещё одну',
-                    'payload': product_id,
+                    'payload': str({'add_to_cart': product_sku}),
                 },
                 {
                     'type': 'postback',
                     'title': 'Удалить из корзины',
-                    'payload': product_id,
+                    'payload': str({'del_from_cart': product_id}),
                 },
             ],
         })
