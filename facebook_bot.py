@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from flask import Flask, request
 
 from facebook_markup import create_product_carousel, create_first_templates_of_menu, create_last_template_of_menu, \
-                            create_first_templates_of_cart, create_product_templates_of_cart
+    create_first_templates_of_cart, create_product_templates_of_cart
 from motlin_api import add_item_to_cart, get_cart, delete_cart_item
 
 app = Flask(__name__)
@@ -54,7 +54,7 @@ def webhook():
     user_state = db.hget(f'facebook_{sender_id}', 'user_state')
 
     # db.delete(f'facebook_{sender_id}')
-    if user_state == None:
+    if user_state is None:
         user_state = send_menu(sender_id)
         db.hset(f'facebook_{sender_id}', 'user_state', user_state)
         return "ok", 200
@@ -80,7 +80,6 @@ def handle_cart(data, sender_id):
         return 'cart'
 
 
-
 def handle_payload(payload, sender_id, user_state):
     try:
         payload = eval(payload)
@@ -88,7 +87,10 @@ def handle_payload(payload, sender_id, user_state):
             add_item_to_cart(payload['add_to_cart'], 1, f'facebook_{sender_id}')
         if 'del_from_cart' in payload:
             delete_cart_item(f'facebook_{sender_id}', payload['del_from_cart'])
-        send_cart(sender_id)
+        if user_state == 'cart':
+            send_cart(sender_id)
+        if user_state == 'menu':
+            send_menu(sender_id)
         return user_state
     except:
         pass
@@ -103,7 +105,7 @@ def handle_payload(payload, sender_id, user_state):
     if payload == 'special':  # специальные пиццы
         send_menu(sender_id, pizzas_type='special')
 
-    if payload == 'main' or payload =='menu':  # основные пиццы
+    if payload == 'main' or payload == 'menu':  # основные пиццы
         send_menu(sender_id, pizzas_type='main')
 
     if payload == 'hot':  # острые пиццы
@@ -214,4 +216,3 @@ if __name__ == '__main__':
         app.run(debug=True)
     except Exception as err:
         logger.exception('Bot FB got an error')
-
