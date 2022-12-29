@@ -73,7 +73,7 @@ def create_last_template_of_menu(category_name):
     }]
 
 
-def create_product_templates_of_cart(cart):
+def create_cart_templates(cart):
     cart_carousel = []
     for product in cart['data']:
         product_id = product['id']

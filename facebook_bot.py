@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from flask import Flask, request
 
 from facebook_markup import create_product_carousel, create_first_templates_of_menu, create_last_template_of_menu, \
-    create_first_templates_of_cart, create_product_templates_of_cart
+    create_first_templates_of_cart, create_cart_templates
 from motlin_api import add_item_to_cart, get_cart, delete_cart_item
 
 app = Flask(__name__)
@@ -123,13 +123,13 @@ def handle_main_menu(data, sender_id):
 
 
 def send_cart(sender_id):
-    cart = get_cart(f'facebook_{sender_id}')
+    user_cart = get_cart(f'facebook_{sender_id}')
 
     params = {"access_token": os.environ['FACEBOOK_PAGE_ACCESS_TOKEN']}
     headers = {"Content-Type": "application/json"}
 
-    cart_carousel = create_first_templates_of_cart(cart['meta']['display_price']['with_tax']['amount']) + \
-                    create_product_templates_of_cart(cart)
+    cart_carousel = create_first_templates_of_cart(user_cart['meta']['display_price']['with_tax']['amount']) + \
+                    create_cart_templates(user_cart)
 
     json_data = {
         'recipient': {
