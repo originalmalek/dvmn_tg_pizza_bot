@@ -53,7 +53,6 @@ def webhook():
     sender_id = data['entry'][0]['messaging'][0]['sender']['id']
     user_state = db.hget(f'facebook_{sender_id}', 'user_state')
 
-    # db.delete(f'facebook_{sender_id}')
     if user_state is None:
         user_state = send_menu(sender_id)
         db.hset(f'facebook_{sender_id}', 'user_state', user_state)
