@@ -57,11 +57,11 @@ def create_last_template_of_menu(category_name):
                             'rich': 'Сытные пиццы',
                             }
     all_pizza_categories.pop(category_name)
-    for key, value in all_pizza_categories.items():
+    for pizza_category, pizza_name_button in all_pizza_categories.items():
         pizza_categories_in_menu.append({
             'type': 'postback',
-            'title': value,
-            'payload': key,
+            'title': pizza_name_button,
+            'payload': pizza_category,
         })
 
     return [{
