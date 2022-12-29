@@ -77,7 +77,7 @@ def add_order_to_crm(chat_id, email):
         'Authorization': get_access_token(),
     }
 
-    json_data = {
+    user_data = {
         'data': {
             'type': 'customer',
             'name': str(chat_id),
@@ -86,7 +86,7 @@ def add_order_to_crm(chat_id, email):
         },
     }
 
-    response = requests.post('https://api.moltin.com/v2/customers', headers=headers, json=json_data)
+    response = requests.post('https://api.moltin.com/v2/customers', headers=headers, json=user_data)
     response.raise_for_status()
 
 
@@ -124,7 +124,7 @@ def create_entry_client_address(flow_slug, user_id, longitude, latitude):
         'Content-Type': 'application/json',
     }
 
-    json_data = {
+    user_coordinates_data = {
         'data': {
             'type': 'entry',
             'UserId': user_id,
@@ -134,7 +134,7 @@ def create_entry_client_address(flow_slug, user_id, longitude, latitude):
     }
 
     response = requests.post(f'https://api.moltin.com/v2/flows/{flow_slug}/entries',
-                             headers=headers, json=json_data)
+                             headers=headers, json=user_coordinates_data)
     response.raise_for_status()
 
 
