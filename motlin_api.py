@@ -22,9 +22,9 @@ def get_access_token():
 
         response = requests.post('https://api.moltin.com/oauth/access_token', data=data)
         response.raise_for_status()
-        response_json = response.json()
-        EP_ACCESS_TOKEN = response_json['access_token']
-        EP_TOKEN_TIME = response_json['expires']
+        access_token_data = response.json()
+        EP_ACCESS_TOKEN = access_token_data['access_token']
+        EP_TOKEN_TIME = access_token_data['expires']
     return EP_ACCESS_TOKEN
 
 
@@ -54,9 +54,9 @@ def add_item_to_cart(product_sku, quantity, chat_id):
         'Content-Type': 'application/json',
     }
 
-    json_data = {"data": {"sku": f"{product_sku}", "type": "cart_item", "quantity": quantity}}
+    add_product_data = {"data": {"sku": f"{product_sku}", "type": "cart_item", "quantity": quantity}}
 
-    response = requests.post(f'https://api.moltin.com/v2/carts/{cart_id}/items', headers=headers, json=json_data)
+    response = requests.post(f'https://api.moltin.com/v2/carts/{cart_id}/items', headers=headers, json=add_product_data)
     response.raise_for_status()
     return response.json()
 
