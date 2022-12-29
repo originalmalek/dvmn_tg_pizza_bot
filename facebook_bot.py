@@ -55,17 +55,14 @@ def webhook():
 
     if user_state is None:
         user_state = send_menu(sender_id)
-        db.hset(f'facebook_{sender_id}', 'user_state', user_state)
-        return "ok", 200
+
     if user_state.decode('utf-8') == 'menu':
         user_state = handle_main_menu(data, sender_id)
-        db.hset(f'facebook_{sender_id}', 'user_state', user_state)
-        return "ok", 200
+
     if user_state.decode('utf-8') == 'cart':
         user_state = handle_cart(data, sender_id)
-        db.hset(f'facebook_{sender_id}', 'user_state', user_state)
-        return "ok", 200
 
+    db.hset(f'facebook_{sender_id}', 'user_state', user_state)
     return "ok", 200
 
 
@@ -80,6 +77,8 @@ def handle_cart(data, sender_id):
 
 
 def handle_payload(payload, sender_id, user_state):
+
+    '''В Try Exctept проверяю, есть ли в payload данные для добавления или удаления товара в корзину / из корзины '''
     try:
         payload = eval(payload)
         if 'add_to_cart' in payload:
