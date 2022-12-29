@@ -33,7 +33,7 @@ def create_first_templates_of_menu():
     return [{
         'title': f'Пиццерия. Заказать пиццу прямо сейчас.',
         'image_url': 'https://st2.depositphotos.com/3687485/9049/v/950/depositphotos_90493674-stock-illustration-pizza-flat-icon-logo-template.jpg',
-        'subtitle': f'Быcтрая доставка за 35 минут',
+        'subtitle': 'Быcтрая доставка за 35 минут',
         'buttons': [
             {
                 'type': 'postback',
@@ -65,9 +65,9 @@ def create_last_template_of_menu(category_name):
         })
 
     return [{
-        'title': f'Не нашли нужную пиццу?',
+        'title': 'Не нашли нужную пиццу?',
         'image_url': 'https://primepizza.ru/uploads/position/large_0c07c6fd5c4dcadddaf4a2f1a2c218760b20c396.jpg',
-        'subtitle': f'Найдите свою пиццу в другой категории',
+        'subtitle': 'Найдите свою пиццу в другой категории',
         'buttons': pizza_categories_in_menu
         ,
     }]
