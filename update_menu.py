@@ -20,7 +20,6 @@ def get_database_connection():
 def upload_menu_to_redis():
     menu = get_products()
     db.set('menu', str(menu))
-    print(db.get('menu'))
 
 
 if __name__ == '__main__':
