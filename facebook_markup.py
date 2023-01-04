@@ -38,12 +38,12 @@ def create_first_templates_of_menu():
             {
                 'type': 'postback',
                 'title': 'Корзина',
-                'payload': 'cart',
+                'payload': str({'action': 'cart'}),
             },
             {
                 'type': 'postback',
                 'title': 'Сделать заказ',
-                'payload': 'make_order',
+                'payload': str({'action': 'make_order'}),
             },
         ],
     }]
@@ -61,7 +61,7 @@ def create_last_template_of_menu(category_name):
         pizza_categories_in_menu.append({
             'type': 'postback',
             'title': pizza_name_button,
-            'payload': pizza_category,
+            'payload': str({'action': pizza_category}),
         })
 
     return [{
@@ -114,7 +114,7 @@ def create_first_templates_of_cart(money_amount):
             {
                 'type': 'postback',
                 'title': 'Возврат в меню',
-                'payload': 'menu',
+                'payload': str({'action': 'menu'}),
             },
         ],
     }]

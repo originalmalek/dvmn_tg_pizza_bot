@@ -44,18 +44,15 @@ def webhook():
     user_state = db.hget(f'facebook_{sender_id}', 'user_state')
 
     if user_state is None:
-        user_state = send_menu(sender_id)
-        db.hset(f'facebook_{sender_id}', 'user_state', user_state)
-        return "ok", 200
-    if user_state.decode('utf-8') == 'menu':
-        user_state = handle_main_menu(data, sender_id)
-        db.hset(f'facebook_{sender_id}', 'user_state', user_state)
-        return "ok", 200
-    if user_state.decode('utf-8') == 'cart':
-        user_state = handle_cart(data, sender_id)
-        db.hset(f'facebook_{sender_id}', 'user_state', user_state)
-        return "ok", 200
+        new_user_state = send_menu(sender_id)
 
+    if user_state.decode('utf-8') == 'menu':
+        new_user_state = handle_main_menu(data, sender_id)
+
+    if user_state.decode('utf-8') == 'cart':
+        new_user_state = handle_cart(data, sender_id)
+
+    db.hset(f'facebook_{sender_id}', 'user_state', new_user_state)
     return "ok", 200
 
 
@@ -71,44 +68,39 @@ def handle_cart(data, sender_id):
 
 def handle_payload(payload, sender_id, user_state):
 
-    '''В Try Exctept проверяю, есть ли в payload данные для добавления или удаления товара в корзину / из корзины '''
-    try:
-        print(payload)
-        print(type(payload))
-        # payload = json.dumps(payload)
-        print(type(payload))
-        payload = eval(payload)
-        print(type(payload))
-        # if 'add_to_cart' in payload:
-        #     add_item_to_cart(payload['add_to_cart'], 1, f'facebook_{sender_id}')
-        # if 'del_from_cart' in payload:
-        #     delete_cart_item(f'facebook_{sender_id}', payload['del_from_cart'])
-        # if user_state == 'cart':
-        #     send_cart(sender_id)
-        # if user_state == 'menu':
-        #     send_menu(sender_id)
-        return user_state
-    except json.decoder.JSONDecodeError as err:
-        print(2)
-        logger.error(err)
+    payload = eval(payload)
 
-    if payload == 'cart':  # корзина
+    if 'action' in payload:
+        action = payload['action']
+
+        if action == 'cart':  # корзина
+            send_cart(sender_id)
+            return 'cart'
+
+        if action == 'rich':  # сытные пиццы
+            send_menu(sender_id, pizzas_type='rich')
+
+        if action == 'special':  # специальные пиццы
+            send_menu(sender_id, pizzas_type='special')
+
+        if action == 'main' or action == 'menu':  # основные пиццы
+            send_menu(sender_id, pizzas_type='main')
+
+        if action == 'hot':  # острые пиццы
+            send_menu(sender_id, pizzas_type='hot')
+
+        return 'menu'
+
+    if 'add_to_cart' in payload:
+        add_item_to_cart(payload['add_to_cart'], 1, f'facebook_{sender_id}')
+    if 'del_from_cart' in payload:
+        delete_cart_item(f'facebook_{sender_id}', payload['del_from_cart'])
+    if user_state == 'cart':
         send_cart(sender_id)
-        return 'cart'
+    if user_state == 'menu':
+        send_menu(sender_id)
+    return user_state
 
-    if payload == 'rich':  # сытные пиццы
-        send_menu(sender_id, pizzas_type='rich')
-
-    if payload == 'special':  # специальные пиццы
-        send_menu(sender_id, pizzas_type='special')
-
-    if payload == 'main' or payload == 'menu':  # основные пиццы
-        send_menu(sender_id, pizzas_type='main')
-
-    if payload == 'hot':  # острые пиццы
-        send_menu(sender_id, pizzas_type='hot')
-
-    return 'menu'
 
 
 def handle_main_menu(data, sender_id):
