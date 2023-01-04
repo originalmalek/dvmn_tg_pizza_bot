@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-from main import get_database_connection
+from get_database_connection import get_database_connection
 from motlin_api import get_products
 
 
@@ -14,3 +14,4 @@ if __name__ == '__main__':
 
     menu = get_products()
     upload_menu_to_redis(menu)
+

@@ -2,12 +2,14 @@ import json
 import logging
 import os
 
-import redis
 import requests
 
 from geopy import distance
 from textwrap import dedent
 from dotenv import load_dotenv
+
+from get_database_connection import get_database_connection
+
 from telegram_logger import MyLogsHandler
 
 from telegram_markup import generate_menu_markup, generate_product_markup, generate_cart_markup
@@ -21,16 +23,6 @@ from motlin_api import get_cart, add_item_to_cart, get_product_data, delete_cart
     download_product_picture, get_all_entries, create_entry_client_address
 
 logger = logging.getLogger('TG ElasticPath Bot')
-
-
-def get_database_connection():
-    global _database
-    if _database is None:
-        database_password = os.getenv('DATABASE_PASSWORD')
-        database_host = os.getenv('DATABASE_HOST')
-        database_port = os.getenv('DATABASE_PORT')
-        _database = redis.Redis(host=database_host, port=database_port, password=database_password)
-    return _database
 
 
 def handle_description(bot, update, job_queue):

@@ -2,7 +2,6 @@ import os
 import logging
 import json
 
-import redis
 import requests
 
 from telegram_logger import MyLogsHandler
@@ -10,23 +9,14 @@ from telegram_logger import MyLogsHandler
 from dotenv import load_dotenv
 from flask import Flask, request
 
+from get_database_connection import get_database_connection
+
 from facebook_markup import create_product_carousel, create_first_templates_of_menu, create_last_template_of_menu, \
     create_first_templates_of_cart, create_cart_templates
 from motlin_api import add_item_to_cart, get_cart, delete_cart_item
 
 app = Flask(__name__)
 logger = logging.getLogger('FB ElasticPath Bot')
-_database = None
-
-
-def get_database_connection():
-    global _database
-    if _database is None:
-        database_password = os.getenv('DATABASE_PASSWORD')
-        database_host = os.getenv('DATABASE_HOST')
-        database_port = os.getenv('DATABASE_PORT')
-        _database = redis.Redis(host=database_host, port=database_port, password=database_password)
-    return _database
 
 
 @app.route('/', methods=['GET'])
@@ -55,14 +45,17 @@ def webhook():
 
     if user_state is None:
         user_state = send_menu(sender_id)
-
+        db.hset(f'facebook_{sender_id}', 'user_state', user_state)
+        return "ok", 200
     if user_state.decode('utf-8') == 'menu':
         user_state = handle_main_menu(data, sender_id)
-
+        db.hset(f'facebook_{sender_id}', 'user_state', user_state)
+        return "ok", 200
     if user_state.decode('utf-8') == 'cart':
         user_state = handle_cart(data, sender_id)
+        db.hset(f'facebook_{sender_id}', 'user_state', user_state)
+        return "ok", 200
 
-    db.hset(f'facebook_{sender_id}', 'user_state', user_state)
     return "ok", 200
 
 
@@ -80,18 +73,24 @@ def handle_payload(payload, sender_id, user_state):
 
     '''В Try Exctept проверяю, есть ли в payload данные для добавления или удаления товара в корзину / из корзины '''
     try:
+        print(payload)
+        print(type(payload))
+        # payload = json.dumps(payload)
+        print(type(payload))
         payload = eval(payload)
-        if 'add_to_cart' in payload:
-            add_item_to_cart(payload['add_to_cart'], 1, f'facebook_{sender_id}')
-        if 'del_from_cart' in payload:
-            delete_cart_item(f'facebook_{sender_id}', payload['del_from_cart'])
-        if user_state == 'cart':
-            send_cart(sender_id)
-        if user_state == 'menu':
-            send_menu(sender_id)
+        print(type(payload))
+        # if 'add_to_cart' in payload:
+        #     add_item_to_cart(payload['add_to_cart'], 1, f'facebook_{sender_id}')
+        # if 'del_from_cart' in payload:
+        #     delete_cart_item(f'facebook_{sender_id}', payload['del_from_cart'])
+        # if user_state == 'cart':
+        #     send_cart(sender_id)
+        # if user_state == 'menu':
+        #     send_menu(sender_id)
         return user_state
-    except:
-        pass
+    except json.decoder.JSONDecodeError as err:
+        print(2)
+        logger.error(err)
 
     if payload == 'cart':  # корзина
         send_cart(sender_id)
